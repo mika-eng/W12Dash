@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1738
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "W12Dash", "W12Dash\W12Dash.csproj", "{1EE9515F-BAF5-49B0-B9A3-42C633E6E05E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1EE9515F-BAF5-49B0-B9A3-42C633E6E05E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EE9515F-BAF5-49B0-B9A3-42C633E6E05E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EE9515F-BAF5-49B0-B9A3-42C633E6E05E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EE9515F-BAF5-49B0-B9A3-42C633E6E05E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E239E1E1-C69A-4CDE-B6AD-1FC4068837F0}
+	EndGlobalSection
+EndGlobal
