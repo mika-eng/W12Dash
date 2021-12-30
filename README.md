@@ -10,8 +10,8 @@ W12Dash.exe v1.0.0.0
 --------------------
 
 Tested with:
-Windows 10 Home 20H2
-iracing 2022 Season 1 Hotfix 2 Release (windowed mode)
+- Windows 10 Home 20H2
+- iracing 2022 Season 1 Hotfix 2 Release (windowed mode)
 
 Green lights (left upper side):
 - DRS not available (all lights off)
