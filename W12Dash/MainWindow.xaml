@@ -14,7 +14,7 @@
             <SolidColorBrush Opacity="0.5" Color="Black"/>
         </Border.Background>
         <Grid Margin="0,0,504,359">
-            <Canvas Margin="20,93,-460,-320" Background="#FF0a0a0a" Opacity="0.8">
+            <Canvas Margin="20,93,-460,-320" Background="#FF0a0a0a" Opacity="0.8" >
                 <Label x:Name="lblGear" Content="1" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="106" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="110" VerticalAlignment="Top" Width="100" Canvas.Left="169" Canvas.Top="-21"/>
                 <Label x:Name="lblDeploy" Content="1 NODLY" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="22" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="33" VerticalAlignment="Top" Width="100" Canvas.Left="169" Canvas.Top="90"/>
                 <Label x:Name="lblBattery" Content="100" HorizontalAlignment="Left" Foreground="Yellow" FontSize="36" Padding="0,0,2,0" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" FontFamily="Calibri" Height="44" VerticalAlignment="Top" Width="90" Canvas.Left="175" Canvas.Top="157"/>
@@ -34,8 +34,8 @@
                 <Rectangle  Fill="#FFC8C8C8" Height="1" Width="100" Opacity="0.2" Canvas.Left="169" Canvas.Top="123"/>
                 <Rectangle  Fill="#FFC8C8C8" Height="1" Width="440" Opacity="0.2"/>
                 <Rectangle  Fill="#FFC8C8C8" Height="1" Width="440" Opacity="0.2" Canvas.Top="226"/>
-                <Rectangle  Fill="#FFC8C8C8" Width="1" Opacity="0.2" Height="226" Canvas.Left="168"/>
-                <Rectangle  Fill="#FFC8C8C8" Width="1" Opacity="0.2" Height="226" Canvas.Left="269"/>
+                <Rectangle  Fill="#FFC8C8C8" Width="1" Opacity="0.2" Height="225" Canvas.Left="168" Canvas.Top="1"/>
+                <Rectangle  Fill="#FFC8C8C8" Width="1" Opacity="0.2" Height="225" Canvas.Left="269" Canvas.Top="1"/>
                 <Rectangle  Fill="#FFC8C8C8" Width="1" Opacity="0.2" Height="225" Canvas.Top="1"/>
                 <Rectangle  Fill="#FFC8C8C8" Width="1" Opacity="0.2" Height="225" Canvas.Left="439" Canvas.Top="1"/>
                 <Rectangle  Fill="#FFC8C8C8" Height="1" Opacity="0.2" Canvas.Top="57" Width="168"/>
@@ -43,6 +43,10 @@
                 <Rectangle  Fill="#FFC8C8C8" Height="1" Opacity="0.2" Canvas.Left="270" Canvas.Top="166" Width="169"/>
                 <Rectangle  Fill="#FFC8C8C8" Height="1" Width="100" Opacity="0.2" Canvas.Left="169" Canvas.Top="152"/>
                 <Rectangle  Fill="#FFC8C8C8" Height="1" Width="100" Opacity="0.2" Canvas.Left="169" Canvas.Top="200"/>
+                <Canvas x:Name="overlay" Height="227" Width="440" Visibility="Hidden">
+                    <Label x:Name="lblOverlay" Content="0.0" HorizontalAlignment="Left" Foreground="#FF0A0A0A" FontSize="160" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="227" VerticalAlignment="Top" Width="440" Background="LimeGreen"/>
+                    <Label x:Name="lblOverlayTxt" Content="" HorizontalAlignment="Left" Foreground="#ff0a0a0a" FontSize="44" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="54" VerticalAlignment="Top" Width="440" Background="limeGreen"/>
+                </Canvas>
             </Canvas>
             <Canvas Margin="20,22,-460,-49">
                 <Ellipse x:Name="led_1" Fill="LawnGreen"  HorizontalAlignment="Left" Height="20" Stroke="Transparent" VerticalAlignment="Top" Width="20" Canvas.Top="6"/>

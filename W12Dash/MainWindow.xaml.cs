@@ -13,6 +13,8 @@ namespace W12Dash
     {
         BackgroundWorker worker = new BackgroundWorker();
         iRacingConnection connection = new iRacingConnection();
+        Timer overlayTimer = new Timer();
+        Brush white;
         Brush dimGray;
         Brush orangeRed;
         Brush deepSkyBlue;
@@ -20,11 +22,16 @@ namespace W12Dash
         Brush lawnGreen;
         Brush darkRed;
         Brush limeGreen;
+        Brush seaGreen;
+        Brush lightGray;
+        Brush customBlue;
+        Brush customBlack;
+        Brush customGreen;
         RegistryKey key;
         double opacity = 0.5;
-        double opacity_last = 0.5;
+        double opacityLast = 0.5;
         double scale = 1.0;
-        double scale_last = 1.0;
+        double scaleLast = 1.0;
         double defaultHeigth, defaultWidth;
 
         public MainWindow()
@@ -41,6 +48,7 @@ namespace W12Dash
         private void Worker_DoWork(object sender, DoWorkEventArgs e)
         {
             BrushConverter bc = new BrushConverter();
+            white = (Brush)bc.ConvertFrom("White");
             dimGray = (Brush)bc.ConvertFrom("DimGray");
             orangeRed = (Brush)bc.ConvertFrom("OrangeRed");
             deepSkyBlue = (Brush)bc.ConvertFrom("DeepSkyBlue");
@@ -48,23 +56,38 @@ namespace W12Dash
             lawnGreen = (Brush)bc.ConvertFrom("LawnGreen");
             darkRed = (Brush)bc.ConvertFrom("DarkRed");
             limeGreen = (Brush)bc.ConvertFrom("LimeGreen");
+            seaGreen = (Brush)bc.ConvertFrom("SeaGreen");
+            lightGray = (Brush)bc.ConvertFrom("LightGray");
+            customBlue = (Brush)bc.ConvertFrom("#FF1C49BF");
+            customBlue.Freeze();
+            customBlack = (Brush)bc.ConvertFrom("#FF0A0A0A");
+            customBlack.Freeze();
+            customGreen = (Brush)bc.ConvertFrom("#FF1EA757");
+            customGreen.Freeze();
 
-            float fuel_last = 0.0f;
-            float fuel_delta = 0.0f;
+            var data = connection.QueryData();
+
+            float fuelLast = 0.0f;
+            float fuelDelta = 0.0f;
             int laps = 0;
-            bool onTrack_last = false;
+            bool onTrackLast = false;
             int deployRemain = 4;
             var deployLast = Translator.MGUKDeployMode(0.0f);
+            var bbLast = data.Get<float>("dcBrakeBias");
+            var bbMigLast = data.Get<float>("dcPeakBrakeBias");
+            var diffEntryLast = data.Get<float>("dcDiffEntry");
+            var diffMiddleLast = data.Get<float>("dcDiffMiddle");
+            var diffExitLast = data.Get<float>("dcDiffExit");
+            var engBrkLast = data.Get<float>("dcEngineBraking");
 
             while (true)
             {
-                var data = connection.QueryData();
+                data = connection.QueryData();
 
                 var onTrack = data.Get<bool>("IsOnTrack");
                 var gear = Translator.Gear(data.Get<int>("Gear"));
                 var deploy = Translator.MGUKDeployMode(data.Get<float>("dcMGUKDeployMode"));
                 var batt = (int)(data.Get<float>("EnergyERSBattery") / 40000);
-                var bb = data.Get<float>("dcBrakeBias") + data.Get<float>("dcBrakeBiasFine");
                 var rpm = (int)(data.Get<float>("RPM"));
                 var drs = data.Get<int>("DRS_Status");
                 var pitLim = data.Get<bool>("dcPitSpeedLimiterToggle");
@@ -79,19 +102,28 @@ namespace W12Dash
                 var lastLapTime = data.Get<float>("LapLastLapTime");
                 var lapsCompleted = data.Get<int>("LapCompleted");
                 var speed = data.Get<float>("Speed");
+                var bb = data.Get<float>("dcBrakeBias");
+                var bbFine = data.Get<float>("dcBrakeBiasFine");
+                var bbMig = data.Get<float>("dcPeakBrakeBias");
+                var bbAll = $"{bb + bbFine + bbMig - 1.0f:0.0}".Replace(",", ".");
+                var diffEntry = data.Get<float>("dcDiffEntry");
+                var diffMiddle = data.Get<float>("dcDiffMiddle");
+                var diffExit = data.Get<float>("dcDiffExit");
+                var engBrk = data.Get<float>("dcEngineBraking");
+
 
                 if (lapsCompleted > laps)
                 {
                     if (lastLapTime > 0)
-                        fuel_delta = fuel_last - fuel;
+                        fuelDelta = fuelLast - fuel;
                     
-                    if (fuel_delta < 0 || lastLapTime < 0)
-                        fuel_delta = 0.0f;
+                    if (fuelDelta < 0 || lastLapTime < 0)
+                        fuelDelta = 0.0f;
 
                     deployRemain = 4;
 
                     laps = lapsCompleted;
-                    fuel_last = fuel;
+                    fuelLast = fuel;
                 }
 
                 if (speed > 21.4 && deploy != deployLast)
@@ -104,30 +136,49 @@ namespace W12Dash
 
                 this.Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
                 {
-                    if (!onTrack && onTrack_last)
+                    if (!onTrack && onTrackLast)
                         this.WindowState = WindowState.Minimized;
 
-                    if (onTrack && !onTrack_last)
+                    if (onTrack && !onTrackLast)
                         this.WindowState = WindowState.Normal;
 
-                    onTrack_last = onTrack;
+                    onTrackLast = onTrack;
+
+                    if (bb != bbLast)
+                    {
+                        bbLast = bb;
+                        StartOverlay(bbAll, null, limeGreen, customBlack);
+                    }
+
+                    if (bbMig != bbMigLast)
+                        bbMigLast = (float)StartOverlay(bbMig, "Brk MIG", customGreen, white);
+
+                    if (diffEntry != diffEntryLast)
+                        diffEntryLast = (float)StartOverlay(diffEntry, "Diff Entry", customBlue, white);
+
+                    if (diffMiddle != diffMiddleLast)
+                        diffMiddleLast = (float)StartOverlay(diffMiddle, "Diff Mid", customBlue, white);
+
+                    if (diffExit != diffExitLast)
+                        diffExitLast = (float)StartOverlay(diffExit, "Diff Hispd", customBlue, white);
+
+                    if (engBrk != engBrkLast)
+                        engBrkLast = (float)StartOverlay(engBrk, "Eng Brk", customBlue, white);
+
+                    overlay.Visibility = overlayTimer.Q ? Visibility.Hidden : Visibility.Visible;
 
                     lblPitLim.Visibility = pitLim ? Visibility.Visible : Visibility.Hidden;
                     lblGear.Content = gear;
                     lblDeploy.Content = deploy;
                     lblBattery.Content = batt;
-                    lblBrakeBias.Content = $"{bb:0.0}".Replace(",", ".");
+                    lblBrakeBias.Content = bbAll;
                     lblLast.Content = llt;
-                    lblLL.Content = $"{fuel_delta:0.00}".Replace(",", ".");
+                    lblLL.Content = $"{fuelDelta:0.00}".Replace(",", ".");
                     lblTar.Content = $"{tar:0.00}".Replace(",", ".");
                     lblLap.Content = laps;
                     lblDeployRemain.Content = deployRemain;
                     lblDelta.Content = delta;
-
-                    if (deltaBestLap > 0)
-                        lblDelta.Foreground = darkRed;
-                    else
-                        lblDelta.Foreground = limeGreen;
+                    lblDelta.Foreground = deltaBestLap > 0 ? darkRed : limeGreen;
 
                     if (pitLim)
                     {
@@ -224,6 +275,18 @@ namespace W12Dash
                     }
                 }));
             }
+        }
+
+        private object StartOverlay(object value, object text, Brush background, Brush foreground)
+        {
+            lblOverlay.Content = value;
+            lblOverlay.Background = background;
+            lblOverlay.Foreground = foreground;
+            lblOverlayTxt.Content = text;
+            lblOverlayTxt.Background = background;
+            lblOverlayTxt.Foreground = foreground;
+            overlayTimer.Start(1500);
+            return value;
         }
 
         private void RevLightGreen(Ellipse led, bool on)
@@ -374,8 +437,8 @@ namespace W12Dash
             key = key.OpenSubKey("W12Dash", true);
             this.Left = BitConverter.ToDouble((byte[])key.GetValue("Left"), 0);
             this.Top = BitConverter.ToDouble((byte[])key.GetValue("Top"), 0);
-            opacity = opacity_last = BitConverter.ToDouble((byte[])key.GetValue("Opacity"), 0);
-            scale = scale_last = BitConverter.ToDouble((byte[])key.GetValue("Scale"), 0);
+            opacity = opacityLast = BitConverter.ToDouble((byte[])key.GetValue("Opacity"), 0);
+            scale = scaleLast = BitConverter.ToDouble((byte[])key.GetValue("Scale"), 0);
 
             this.border.Background.Opacity = opacity;
 
@@ -445,7 +508,7 @@ namespace W12Dash
                     break;
             }
 
-            if (opacity != opacity_last)
+            if (opacity != opacityLast)
             {
                 if (opacity > 1.0)
                     opacity = 1.0;
@@ -453,7 +516,7 @@ namespace W12Dash
                 if (opacity < 0.01)
                     opacity = 0.01;
 
-                opacity_last = opacity;
+                opacityLast = opacity;
 
                 this.border.Background.Opacity = opacity;
                 lblSettings.Visibility = Visibility.Visible;
@@ -461,7 +524,7 @@ namespace W12Dash
                 return;
             }
 
-            if (scale == scale_last)
+            if (scale == scaleLast)
                 return;
 
             if (scale > 5.0)
@@ -481,7 +544,7 @@ namespace W12Dash
                 this.Width = defaultWidth * scale;
             }
 
-            scale_last = scale;
+            scaleLast = scale;
 
             lblSettings.Visibility = Visibility.Visible;
             lblSettings.Content = $"Scale {(int)(scale * 100.0)}%";

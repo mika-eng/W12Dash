@@ -59,6 +59,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Timer.cs" />
     <Compile Include="VarType.cs" />
     <Compile Include="Translator.cs" />
     <Page Include="MainWindow.xaml">
