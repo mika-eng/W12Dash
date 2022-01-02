@@ -4,6 +4,16 @@ Dashboard for the iracing Mercedes-AMG W12 E-Performance
 Easy-to-use Dashboard for the Mercedes-AMG W12 E-Performance F1 car using the iracing telemetry.
 Written in C# using .NET Framework WPF.
 
+W12Dash.exe v1.1.0.0
+--------------------
+
+New pop-up overlays when chaning:
+- brake bias
+- brake migration
+- diff entry
+- diff middle
+- diff exit
+- engine braking
 
 
 W12Dash.exe v1.0.0.0
