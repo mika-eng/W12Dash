@@ -9,45 +9,85 @@
         WindowStyle="None"
         Background="Transparent"
         Title="W12 Dash" Height="340" Width="480" Opacity="1.0" ResizeMode="NoResize" SourceInitialized="Window_SourceInitialized" Closing="Window_Closing" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp">
+    <Window.Resources>
+        <Style  x:Key="LabelRoundedAll" TargetType="Label">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Label}">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true" CornerRadius="7.5">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style  x:Key="LabelRoundedLeftBottom" TargetType="Label">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Label}">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true" CornerRadius="0,0,0,7.5">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Border x:Name="border" CornerRadius="10" HorizontalAlignment="Left" VerticalAlignment="Top" Width="480" Height="340">
         <Border.Background>
             <SolidColorBrush Opacity="0.5" Color="Black"/>
         </Border.Background>
         <Grid Margin="0,0,504,359">
-            <Canvas Margin="20,93,-460,-320" Background="#FF0a0a0a" Opacity="0.8" >
-                <Label x:Name="lblGear" Content="1" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="106" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="110" VerticalAlignment="Top" Width="100" Canvas.Left="169" Canvas.Top="-21"/>
-                <Label x:Name="lblDeploy" Content="1 NODLY" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="22" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="33" VerticalAlignment="Top" Width="100" Canvas.Left="169" Canvas.Top="90"/>
-                <Label x:Name="lblBattery" Content="100" HorizontalAlignment="Left" Foreground="Yellow" FontSize="36" Padding="0,0,2,0" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" FontFamily="Calibri" Height="44" VerticalAlignment="Top" Width="90" Canvas.Left="175" Canvas.Top="157"/>
-                <Label x:Name="lblBatteryText" Content="BATT:-" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="12" Padding="2,3,0,0" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" FontFamily="Calibri" Height="20" VerticalAlignment="Top" Width="38" Canvas.Left="172" Canvas.Top="153"/>
-                <Label x:Name="lblBrakeBias" Content="58.0" HorizontalAlignment="Left" Foreground="Orange" FontSize="44" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="51" VerticalAlignment="Top" Width="169" Canvas.Left="270" Canvas.Top="1"/>
-                <Label x:Name="lblPitLim" Content="PIT LIM" HorizontalAlignment="Left" Foreground="Black" FontSize="36" Padding="0,0,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontFamily="Calibri" Height="168" VerticalAlignment="Top" Width="167" Background="#FFFFC800" Canvas.Top="58" Canvas.Left="1"/>
-                <Label x:Name="lblLL" Content="0.00" HorizontalAlignment="Left" Foreground="LimeGreen" FontSize="44" Padding="0" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" FontFamily="Calibri" Height="50" VerticalAlignment="Top" Width="138" Canvas.Left="270" Canvas.Top="58"/>
-                <Label x:Name="lblLLTxt" Content="LL:-" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="12" Padding="2,3,0,0" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" FontFamily="Calibri" Height="23" VerticalAlignment="Top" Width="38" Canvas.Left="273" Canvas.Top="53"/>
-                <Label x:Name="lblDelta" Content="-00.00" HorizontalAlignment="Left" Foreground="LimeGreen" FontSize="44" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="54" VerticalAlignment="Top" Width="167" Canvas.Left="1"/>
-                <Label x:Name="lblLast" Content="0:01.00" HorizontalAlignment="Left" Foreground="#FF0AECEC" FontSize="44" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="54" VerticalAlignment="Top" Width="169" Canvas.Left="270" Canvas.Top="174"/>
-                <Label x:Name="lblLastTxt" Content="LAST:-" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="12" Padding="2,3,0,0" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" FontFamily="Calibri" Height="21" VerticalAlignment="Top" Width="38" Canvas.Left="273" Canvas.Top="167"/>
-                <Label x:Name="lblTar" Content="0.00" HorizontalAlignment="Left" Foreground="LimeGreen" FontSize="44" Padding="0" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" FontFamily="Calibri" Height="51" VerticalAlignment="Top" Width="138" Canvas.Left="270" Canvas.Top="115"/>
-                <Label x:Name="lblTarTxt" Content="TAR:-" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="12" Padding="2,3,0,0" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" FontFamily="Calibri" Height="21" VerticalAlignment="Top" Width="38" Canvas.Left="273" Canvas.Top="109"/>
-                <Label x:Name="lblRace" Content="RACE" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="22" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="28" VerticalAlignment="Top" Width="100" Canvas.Left="169" Canvas.Top="124"/>
-                <Rectangle  Fill="#FFC8C8C8" Height="1" Width="100" Opacity="0.2" Canvas.Left="169" Canvas.Top="89"/>
-                <Rectangle  Fill="#FFC8C8C8" Height="1" Opacity="0.2" Canvas.Left="270" Canvas.Top="52" Width="169"/>
-                <Rectangle  Fill="#FFC8C8C8" Height="1" Width="100" Opacity="0.2" Canvas.Left="169" Canvas.Top="123"/>
-                <Rectangle  Fill="#FFC8C8C8" Height="1" Width="440" Opacity="0.2"/>
-                <Rectangle  Fill="#FFC8C8C8" Height="1" Width="440" Opacity="0.2" Canvas.Top="226"/>
-                <Rectangle  Fill="#FFC8C8C8" Width="1" Opacity="0.2" Height="225" Canvas.Left="168" Canvas.Top="1"/>
-                <Rectangle  Fill="#FFC8C8C8" Width="1" Opacity="0.2" Height="225" Canvas.Left="269" Canvas.Top="1"/>
-                <Rectangle  Fill="#FFC8C8C8" Width="1" Opacity="0.2" Height="225" Canvas.Top="1"/>
-                <Rectangle  Fill="#FFC8C8C8" Width="1" Opacity="0.2" Height="225" Canvas.Left="439" Canvas.Top="1"/>
-                <Rectangle  Fill="#FFC8C8C8" Height="1" Opacity="0.2" Canvas.Top="57" Width="168"/>
-                <Rectangle  Fill="#FFC8C8C8" Height="1" Opacity="0.2" Canvas.Left="270" Canvas.Top="108" Width="169"/>
-                <Rectangle  Fill="#FFC8C8C8" Height="1" Opacity="0.2" Canvas.Left="270" Canvas.Top="166" Width="169"/>
-                <Rectangle  Fill="#FFC8C8C8" Height="1" Width="100" Opacity="0.2" Canvas.Left="169" Canvas.Top="152"/>
-                <Rectangle  Fill="#FFC8C8C8" Height="1" Width="100" Opacity="0.2" Canvas.Left="169" Canvas.Top="200"/>
-                <Canvas x:Name="overlay" Height="227" Width="440" Visibility="Hidden">
-                    <Label x:Name="lblOverlay" Content="0.0" HorizontalAlignment="Left" Foreground="#FF0A0A0A" FontSize="160" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="227" VerticalAlignment="Top" Width="440" Background="LimeGreen"/>
-                    <Label x:Name="lblOverlayTxt" Content="" HorizontalAlignment="Left" Foreground="#ff0a0a0a" FontSize="44" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="54" VerticalAlignment="Top" Width="440" Background="limeGreen"/>
+            <Border Margin="20,62,-460,-320" Background="#FF0a0a0a" Opacity="0.8" BorderThickness="1" BorderBrush="#33C8C8C8" CornerRadius="8">
+                <Canvas Margin="-1,0,1,0"  >
+                    <Label x:Name="lblLapTxt" Content="LAP" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="16" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="24" VerticalAlignment="Top" Width="42" Canvas.Left="402" Canvas.Top="6"/>
+                    <Label x:Name="lblDeployRemainTxt" Content="DEPLOY" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="16" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="24" VerticalAlignment="Top" Width="65" Canvas.Top="6" Canvas.Left="-3"/>
+                    <Label x:Name="lblDeployRemain" Content="4" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="30" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="35" VerticalAlignment="Top" Width="34" Canvas.Left="49" Canvas.Top="-1"/>
+                    <Label x:Name="lblLap" Content="0" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="30" Padding="0" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" FontFamily="Calibri" Height="35" VerticalAlignment="Top" Width="53" Canvas.Left="353" Canvas.Top="-1"/>
+                    <Label x:Name="lblSettings" Content="100%" HorizontalAlignment="Left" Foreground="#FF969696" FontSize="22" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="35" VerticalAlignment="Top" Width="175" Canvas.Left="141" Canvas.Top="-11" Visibility="Hidden"/>
+                    <Label x:Name="lblGear" Content="1" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="106" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="110" VerticalAlignment="Top" Width="100" Canvas.Left="169" Canvas.Top="9"/>
+                    <Label x:Name="lblDeploy" Content="1 NODLY" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="22" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="33" VerticalAlignment="Top" Width="100" Canvas.Left="169" Canvas.Top="120"/>
+                    <Label x:Name="lblBattery" Content="100" HorizontalAlignment="Left" Foreground="Yellow" FontSize="36" Padding="0,0,2,0" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" FontFamily="Calibri" Height="44" VerticalAlignment="Top" Width="90" Canvas.Left="175" Canvas.Top="187"/>
+                    <Label x:Name="lblBatteryText" Content="BATT:-" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="12" Padding="2,3,0,0" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" FontFamily="Calibri" Height="20" VerticalAlignment="Top" Width="38" Canvas.Left="172" Canvas.Top="183"/>
+                    <Label x:Name="lblBrakeBias" Content="58.0" HorizontalAlignment="Left" Foreground="Orange" FontSize="44" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="51" VerticalAlignment="Top" Width="169" Canvas.Left="270" Canvas.Top="31"/>
+                    <Label Style="{StaticResource LabelRoundedLeftBottom}" x:Name="lblPitLim" Content="PIT LIM" HorizontalAlignment="Left" Foreground="Black" FontSize="36" Padding="0,0,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontFamily="Calibri" Height="168" VerticalAlignment="Top" Width="167" Background="#FFFFC800" Canvas.Top="88" Canvas.Left="1"/>
+                    <Label x:Name="lblLL" Content="0.00" HorizontalAlignment="Left" Foreground="LimeGreen" FontSize="44" Padding="0" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" FontFamily="Calibri" Height="50" VerticalAlignment="Top" Width="138" Canvas.Left="270" Canvas.Top="88"/>
+                    <Label x:Name="lblLLTxt" Content="LL:-" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="12" Padding="2,3,0,0" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" FontFamily="Calibri" Height="23" VerticalAlignment="Top" Width="38" Canvas.Left="273" Canvas.Top="83"/>
+                    <Label x:Name="lblDelta" Content="-00.00" HorizontalAlignment="Left" Foreground="LimeGreen" FontSize="44" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="54" VerticalAlignment="Top" Width="167" Canvas.Left="1" Canvas.Top="30"/>
+                    <Label x:Name="lblLast" Content="0:01.00" HorizontalAlignment="Left" Foreground="#FF0AECEC" FontSize="44" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="54" VerticalAlignment="Top" Width="169" Canvas.Left="270" Canvas.Top="204"/>
+                    <Label x:Name="lblLastTxt" Content="LAST:-" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="12" Padding="2,3,0,0" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" FontFamily="Calibri" Height="21" VerticalAlignment="Top" Width="38" Canvas.Left="273" Canvas.Top="197"/>
+                    <Label x:Name="lblTar" Content="0.00" HorizontalAlignment="Left" Foreground="LimeGreen" FontSize="44" Padding="0" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" FontFamily="Calibri" Height="51" VerticalAlignment="Top" Width="138" Canvas.Left="270" Canvas.Top="145"/>
+                    <Label x:Name="lblTarTxt" Content="TAR:-" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="12" Padding="2,3,0,0" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" FontFamily="Calibri" Height="21" VerticalAlignment="Top" Width="38" Canvas.Left="273" Canvas.Top="139"/>
+                    <Label x:Name="lblRace" Content="RACE" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="22" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="28" VerticalAlignment="Top" Width="100" Canvas.Left="169" Canvas.Top="154"/>
+                    <Rectangle  Fill="#FFC8C8C8" Height="1" Width="100" Opacity="0.2" Canvas.Left="169" Canvas.Top="119"/>
+                    <Rectangle  Fill="#FFC8C8C8" Height="1" Opacity="0.2" Canvas.Left="270" Canvas.Top="82" Width="169"/>
+                    <Rectangle  Fill="#FFC8C8C8" Height="1" Width="100" Opacity="0.2" Canvas.Left="169" Canvas.Top="153"/>
+                    <Rectangle  Fill="#FFC8C8C8" Width="1" Opacity="0.2" Height="225" Canvas.Left="168" Canvas.Top="31"/>
+                    <Rectangle  Fill="#FFC8C8C8" Width="1" Opacity="0.2" Height="225" Canvas.Left="269" Canvas.Top="31"/>
+                    <Rectangle  Fill="#FFC8C8C8" Height="1" Opacity="0.2" Canvas.Top="87" Width="168"/>
+                    <Rectangle  Fill="#FFC8C8C8" Height="1" Opacity="0.2" Canvas.Left="270" Canvas.Top="138" Width="169"/>
+                    <Rectangle  Fill="#FFC8C8C8" Height="1" Opacity="0.2" Canvas.Left="270" Canvas.Top="196" Width="169"/>
+                    <Rectangle  Fill="#FFC8C8C8" Height="1" Width="100" Opacity="0.2" Canvas.Left="169" Canvas.Top="182"/>
+                    <Rectangle  Fill="#FFC8C8C8" Height="1" Width="100" Opacity="0.2" Canvas.Left="169" Canvas.Top="230"/>
+                    <Canvas x:Name="overlay" Height="256" Width="439" Visibility="Hidden">
+                        <Label Style="{StaticResource LabelRoundedAll}" x:Name="lblOverlay" Content="0.0" HorizontalAlignment="Left" Foreground="#FF0A0A0A" FontSize="160" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="256" VerticalAlignment="Top" Width="438" Background="LimeGreen" Canvas.Left="1"/>
+                        <Label Style="{StaticResource LabelRoundedAll}" x:Name="lblOverlayTxt" Content="" HorizontalAlignment="Left" Foreground="#ff0a0a0a" FontSize="44" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="75" VerticalAlignment="Top" Width="438" Background="limeGreen" Canvas.Left="1"/>
+                    </Canvas>
+                    <Rectangle  Fill="#FFC8C8C8" Height="1" Width="438" Opacity="0.2" Canvas.Left="1" Canvas.Top="30"/>
+                    <Rectangle  Fill="#FFC8C8C8" Width="1" Opacity="0.2" Height="30" Canvas.Left="84"/>
+                    <Rectangle  Fill="#FFC8C8C8" Width="1" Opacity="0.2" Height="30" Canvas.Left="350"/>
                 </Canvas>
-            </Canvas>
+            </Border>
             <Canvas Margin="20,22,-460,-49">
                 <Ellipse x:Name="led_1" Fill="LawnGreen"  HorizontalAlignment="Left" Height="20" Stroke="Transparent" VerticalAlignment="Top" Width="20" Canvas.Top="6"/>
                 <Ellipse x:Name="led_2" Fill="LawnGreen"  HorizontalAlignment="Left" Height="20" Stroke="Transparent" VerticalAlignment="Top" Width="20" RenderTransformOrigin="1.8,0.6" Canvas.Left="30" Canvas.Top="4"/>
@@ -64,13 +104,6 @@
                 <Ellipse x:Name="led_13" Fill="DeepSkyBlue"  HorizontalAlignment="Left" Height="20" Stroke="Transparent" VerticalAlignment="Top" Width="20" Canvas.Left="360" Canvas.Top="3"/>
                 <Ellipse x:Name="led_14" Fill="DeepSkyBlue"  HorizontalAlignment="Left" Height="20" Stroke="Transparent" VerticalAlignment="Top" Width="20" RenderTransformOrigin="1.8,0.6" Canvas.Left="390" Canvas.Top="4"/>
                 <Ellipse x:Name="led_15" Fill="DeepSkyBlue" HorizontalAlignment="Left" Height="20" Stroke="Transparent" VerticalAlignment="Top" Width="20" RenderTransformOrigin="1.8,0.6" Canvas.Left="420" Canvas.Top="6"/>
-            </Canvas>
-            <Canvas Margin="12,62,-467,-97">
-                <Label x:Name="lblLapTxt" Content="LAP" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="16" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="24" VerticalAlignment="Top" Width="42" Canvas.Left="413" Canvas.Top="9"/>
-                <Label x:Name="lblDeployRemainTxt" Content="DEPLOY" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="16" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="24" VerticalAlignment="Top" Width="65" Canvas.Top="9" Canvas.Left="1"/>
-                <Label x:Name="lblDeployRemain" Content="4" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="30" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="35" VerticalAlignment="Top" Width="34" Canvas.Left="53"/>
-                <Label x:Name="lblLap" Content="0" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="30" Padding="0" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" FontFamily="Calibri" Height="35" VerticalAlignment="Top" Width="53" Canvas.Left="364"/>
-                <Label x:Name="lblSettings" Content="100%" HorizontalAlignment="Left" Foreground="#FF969696" FontSize="22" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="35" VerticalAlignment="Top" Width="175" Canvas.Left="141" Canvas.Top="-11" Visibility="Hidden"/>
             </Canvas>
             <Rectangle x:Name="rectangle" Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="340" Stroke="Black" VerticalAlignment="Top" Width="479" MouseDown="Rectangle_MouseDown" Opacity="0" MouseEnter="Rectangle_MouseEnter" MouseLeave="Rectangle_MouseLeave" Margin="0,0,-479,-340"/>
             <Label x:Name="lblExit" Content="x" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="455,2,-476,-25" Padding="0" VerticalAlignment="Top" RenderTransformOrigin="0.211,0.385" Foreground="#FFC8C8C8" FontFamily="Calibri" FontWeight="Normal" Width="21" FontSize="18" MouseEnter="LblExit_MouseEnter" MouseLeave="LblExit_MouseLeave" Height="23" MouseUp="LblExit_MouseUp" />

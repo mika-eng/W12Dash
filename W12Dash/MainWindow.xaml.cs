@@ -85,6 +85,8 @@ namespace W12Dash
                 data = connection.QueryData();
 
                 var onTrack = data.Get<bool>("IsOnTrack");
+                var brake = data.Get<float>("Brake");
+                var brakeScaled = brake > 0.5f ? 2 * brake - 1 : 0;
                 var gear = Translator.Gear(data.Get<int>("Gear"));
                 var deploy = Translator.MGUKDeployMode(data.Get<float>("dcMGUKDeployMode"));
                 var batt = (int)(data.Get<float>("EnergyERSBattery") / 40000);
@@ -105,7 +107,7 @@ namespace W12Dash
                 var bb = data.Get<float>("dcBrakeBias");
                 var bbFine = data.Get<float>("dcBrakeBiasFine");
                 var bbMig = data.Get<float>("dcPeakBrakeBias");
-                var bbAll = $"{bb + bbFine + bbMig - 1.0f:0.0}".Replace(",", ".");
+                var bbAll = $"{bb + bbFine + (bbMig - 1.0f) * brakeScaled:0.0}".Replace(",", ".");
                 var diffEntry = data.Get<float>("dcDiffEntry");
                 var diffMiddle = data.Get<float>("dcDiffMiddle");
                 var diffExit = data.Get<float>("dcDiffExit");
@@ -173,7 +175,7 @@ namespace W12Dash
                     lblBattery.Content = batt;
                     lblBrakeBias.Content = bbAll;
                     lblLast.Content = llt;
-                    lblLL.Content = $"{fuelDelta:0.00}".Replace(",", ".");
+                    lblLL.Content = $"{fuelLast:0.00}".Replace(",", ".");
                     lblTar.Content = $"{tar:0.00}".Replace(",", ".");
                     lblLap.Content = laps;
                     lblDeployRemain.Content = deployRemain;
