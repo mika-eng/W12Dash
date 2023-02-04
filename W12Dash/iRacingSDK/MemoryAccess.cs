@@ -17,80 +17,72 @@
 // along with iRacingSDK.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
-using System.Collections.Generic;
 
-namespace W12Dash
+namespace W12Dash.iRacingSDK
 {
-    class MemoryAccess
+    internal class MemoryAccess
     {
-        MemoryMappedViewAccessor accessor;
-        IntPtr dataValidEvent;
-        MemoryMappedFile irsdkMappedMemory;
+        private MemoryMappedViewAccessor _accessor;
+        private IntPtr _dataValidEvent;
 
         public bool IsConnected()
         {
-            if (this.accessor != null)
+            if (_accessor != null)
                 return true;
 
             var dataValidEvent = Event.OpenEvent(Event.EVENT_ALL_ACCESS | Event.EVENT_MODIFY_STATE, false, "Local\\IRSDKDataValidEvent");
             if (dataValidEvent == IntPtr.Zero)
                 return false;
 
-            MemoryMappedFile irsdkMappedMemory = null;
+            MemoryMappedFile irSdkMappedMemory = null;
             try
             {
-                irsdkMappedMemory = MemoryMappedFile.OpenExisting("Local\\IRSDKMemMapFileName");
+                irSdkMappedMemory = MemoryMappedFile.OpenExisting("Local\\IRSDKMemMapFileName");
             }
             catch
             {
+                // ignored
             }
 
-            if (irsdkMappedMemory == null)
+            if (irSdkMappedMemory == null)
                 return false;
 
-            var accessor = irsdkMappedMemory.CreateViewAccessor();
-            if (accessor == null)
-            {
-                irsdkMappedMemory.Dispose();
-                return false;
-            }
+            var accessor = irSdkMappedMemory.CreateViewAccessor();
 
-            this.irsdkMappedMemory = irsdkMappedMemory;
-            this.dataValidEvent = dataValidEvent;
-            this.accessor = accessor;
+            _dataValidEvent = dataValidEvent;
+            _accessor = accessor;
             return true;
         }
 
         public bool WaitForData()
         {
-            return Event.WaitForSingleObject(dataValidEvent, 1000) == 0;
+            return Event.WaitForSingleObject(_dataValidEvent, 1000) == 0;
         }
 
         public unsafe Data GetData()
         {
-            var headers = accessor.AcquirePointer(ptr =>
+            var headers = _accessor.AcquirePointer(ptr =>
             {
                 var a = ReadHeader(ptr);
                 var b = ReadVariableHeaders(a, ptr);
                 return new { Header = a, VarHeaders = b };
             });
 
-            if ((headers.Header.status & 1) == 0)
-                return new Data(false);
-
-            return ReadVariables(headers.Header, headers.VarHeaders);
+            return (headers.Header.status & 1) == 0 ? new Data(false) : ReadVariables(headers.Header, headers.VarHeaders);
         }
 
-        unsafe iRacingHeader ReadHeader(byte* ptr)
+        unsafe Header ReadHeader(byte* ptr)
         {
-            return (iRacingHeader)Marshal.PtrToStructure(new IntPtr(ptr), typeof(iRacingHeader));
+            return (Header)Marshal.PtrToStructure(new IntPtr(ptr), typeof(Header));
         }
 
-        static readonly int size = Marshal.SizeOf(typeof(VarHeader));
+        private static readonly int Size = Marshal.SizeOf(typeof(VarHeader));
 
-        unsafe VarHeader[] ReadVariableHeaders(iRacingHeader header, byte* ptr)
+        private static unsafe VarHeader[] ReadVariableHeaders(Header header, byte* ptr)
         {
             var varHeaders = new VarHeader[header.numVars];
             ptr += header.varHeaderOffset;
@@ -98,21 +90,21 @@ namespace W12Dash
             for (var i = 0; i < header.numVars; i++)
             {
                 varHeaders[i] = (VarHeader)Marshal.PtrToStructure(new IntPtr(ptr), typeof(VarHeader));
-                ptr += size;
+                ptr += Size;
             }
 
             return varHeaders;
         }
 
-        unsafe Data ReadVariables(iRacingHeader header, VarHeader[] varHeaders)
+        private unsafe Data ReadVariables(Header header, VarHeader[] varHeaders)
         {
             var buf = header.varBuf;
-            var values = ReadAllValues(accessor, buf.bufOffset, varHeaders);
-            var latestHeader = accessor.AcquirePointer(ptr => ReadHeader(ptr));
+            var values = ReadAllValues(_accessor, buf.bufOffset, varHeaders);
+            _accessor.AcquirePointer(ReadHeader);
             return values;
         }
 
-        static Data ReadAllValues(MemoryMappedViewAccessor accessor, int buffOffset, VarHeader[] varHeaders)
+        private static Data ReadAllValues(UnmanagedMemoryAccessor accessor, int buffOffset, VarHeader[] varHeaders)
         {
             var data = new Data();
 
@@ -124,7 +116,7 @@ namespace W12Dash
                 { VarType.Float, (offset) => accessor.ReadSingle(offset) }
             };
 
-            var arryMaps = new Dictionary<VarType, Func<int, int, object>>() {
+            var arrayMaps = new Dictionary<VarType, Func<int, int, object>>() {
                 { VarType.Int, (size, offset) => GetArrayData<int>(accessor, size, offset) },
                 { VarType.BitField, (size, offset) => GetArrayData<int>(accessor, size, offset) },
                 { VarType.Double, (size, offset) => GetArrayData<double>(accessor, size, offset) },
@@ -132,19 +124,14 @@ namespace W12Dash
                 { VarType.Bool, (size, offset) => GetArrayData<bool>(accessor, size, offset) }
             };
 
-            for (var i = 0; i < varHeaders.Length; i++)
+            foreach (var varHeader in varHeaders)
             {
-                var varHeader = varHeaders[i];
                 var offset = buffOffset + varHeader.offset;
 
                 if (varHeader.type == VarType.Char)
                     throw new NotSupportedException();
 
-                object value;
-                if (varHeader.count != 1)
-                    value = arryMaps[varHeader.type](varHeader.count, offset);
-                else
-                    value = maps[varHeader.type](offset);
+                var value = varHeader.count != 1 ? arrayMaps[varHeader.type](varHeader.count, offset) : maps[varHeader.type](offset);
 
                 data.Add(varHeader.name, value);
             }
@@ -152,10 +139,10 @@ namespace W12Dash
             return data;
         }
 
-        static T[] GetArrayData<T>(MemoryMappedViewAccessor accessor, int size, int offset) where T : struct
+        private static T[] GetArrayData<T>(UnmanagedMemoryAccessor accessor, int size, int offset) where T : struct
         {
             var data = new T[size];
-            accessor.ReadArray<T>(offset, data, 0, size);
+            accessor.ReadArray(offset, data, 0, size);
             return data;
         }
     }

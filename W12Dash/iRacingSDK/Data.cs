@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace W12Dash
+namespace W12Dash.iRacingSDK
 {
     public class Data : Dictionary<string, object>
     {
@@ -13,7 +13,7 @@ namespace W12Dash
 
         public T Get<T>(string telemetryName)
         {
-            if (this.ContainsKey(telemetryName))
+            if (ContainsKey(telemetryName))
                 return (T)this[telemetryName];
 
             return default(T);

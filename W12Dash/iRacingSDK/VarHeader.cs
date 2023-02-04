@@ -16,24 +16,30 @@
 // You should have received a copy of the GNU General Public License
 // along with iRacingSDK.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace W12Dash
-{
-    public static class MemoryMappedViewAccessorExt
-    {
-        public unsafe delegate T MyFn<T>(byte* ptr);
+using System.Runtime.InteropServices;
 
-        public unsafe static T AcquirePointer<T>(this System.IO.MemoryMappedFiles.MemoryMappedViewAccessor self, MyFn<T> fn)
-        {
-            byte* ptr = null;
-            self.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
-            try
-            {
-                return fn(ptr);
-            }
-            finally
-            {
-                self.SafeMemoryMappedViewHandle.ReleasePointer();
-            }
-        }
-    }
+namespace W12Dash.iRacingSDK
+{
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+	internal struct VarHeader
+	{
+		//0..3
+		public readonly VarType type;
+		//4..7
+		public readonly int offset;
+		//8..11
+		public readonly int count;
+        //12..15
+		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)]
+		public readonly int[] pad;
+		//16..47
+		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+		public readonly string name;
+		//48..111
+		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
+		public readonly string desc;
+		//112..143
+		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+		public readonly string unit;
+	}	
 }

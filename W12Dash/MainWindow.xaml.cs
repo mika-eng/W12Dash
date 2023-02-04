@@ -4,75 +4,73 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.ComponentModel;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using Microsoft.Win32;
+using W12Dash.iRacingSDK;
 
 namespace W12Dash
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
-        BackgroundWorker worker = new BackgroundWorker();
-        iRacingConnection connection = new iRacingConnection();
-        Timer overlayTimer = new Timer();
-        Brush white;
-        Brush dimGray;
-        Brush orangeRed;
-        Brush deepSkyBlue;
-        Brush transparent;
-        Brush lawnGreen;
-        Brush darkRed;
-        Brush limeGreen;
-        Brush seaGreen;
-        Brush lightGray;
-        Brush customBlue;
-        Brush customBlack;
-        Brush customGreen;
-        RegistryKey key;
-        double opacity = 0.5;
-        double opacityLast = 0.5;
-        double scale = 1.0;
-        double scaleLast = 1.0;
-        double defaultHeigth, defaultWidth;
+        private readonly Connection _connection = new Connection();
+        private readonly Timer _overlayTimer = new Timer();
+        private Brush _white;
+        private Brush _dimGray;
+        private Brush _orangeRed;
+        private Brush _deepSkyBlue;
+        private Brush _transparent;
+        private Brush _lawnGreen;
+        private Brush _darkRed;
+        private Brush _limeGreen;
+        private Brush _customBlue;
+        private Brush _customBlack;
+        private Brush _customGreen;
+        private RegistryKey _key;
+        private double _opacity = 0.5;
+        private double _opacityLast = 0.5;
+        private double _scale = 1.0;
+        private double _scaleLast = 1.0;
+        private double _defaultHeight, _defaultWidth;
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         public MainWindow()
         {
             InitializeComponent();
-            this.Topmost = true;
+            Topmost = true;
             lblExit.Visibility = Visibility.Hidden;
             lblMinimize.Visibility = Visibility.Hidden;
-
-            worker.DoWork += Worker_DoWork;
-            worker.RunWorkerAsync();           
+            
+            Task.Run(Update);
         }
 
-        private void Worker_DoWork(object sender, DoWorkEventArgs e)
+        private void Update()
         {
-            BrushConverter bc = new BrushConverter();
-            white = (Brush)bc.ConvertFrom("White");
-            dimGray = (Brush)bc.ConvertFrom("DimGray");
-            orangeRed = (Brush)bc.ConvertFrom("OrangeRed");
-            deepSkyBlue = (Brush)bc.ConvertFrom("DeepSkyBlue");
-            transparent = (Brush)bc.ConvertFrom("Transparent");
-            lawnGreen = (Brush)bc.ConvertFrom("LawnGreen");
-            darkRed = (Brush)bc.ConvertFrom("DarkRed");
-            limeGreen = (Brush)bc.ConvertFrom("LimeGreen");
-            seaGreen = (Brush)bc.ConvertFrom("SeaGreen");
-            lightGray = (Brush)bc.ConvertFrom("LightGray");
-            customBlue = (Brush)bc.ConvertFrom("#FF1C49BF");
-            customBlue.Freeze();
-            customBlack = (Brush)bc.ConvertFrom("#FF0A0A0A");
-            customBlack.Freeze();
-            customGreen = (Brush)bc.ConvertFrom("#FF1EA757");
-            customGreen.Freeze();
+            var bc = new BrushConverter();
+            _white = (Brush)bc.ConvertFrom("White");
+            _dimGray = (Brush)bc.ConvertFrom("DimGray");
+            _orangeRed = (Brush)bc.ConvertFrom("OrangeRed");
+            _deepSkyBlue = (Brush)bc.ConvertFrom("DeepSkyBlue");
+            _transparent = (Brush)bc.ConvertFrom("Transparent");
+            _lawnGreen = (Brush)bc.ConvertFrom("LawnGreen");
+            _darkRed = (Brush)bc.ConvertFrom("DarkRed");
+            _limeGreen = (Brush)bc.ConvertFrom("LimeGreen");
+            _customBlue = (Brush)bc.ConvertFrom("#FF1C49BF");
+            _customBlue?.Freeze();
+            _customBlack = (Brush)bc.ConvertFrom("#FF0A0A0A");
+            _customBlack?.Freeze();
+            _customGreen = (Brush)bc.ConvertFrom("#FF1EA757");
+            _customGreen?.Freeze();
 
-            var data = connection.QueryData();
+            var data = _connection.QueryData();
 
-            float fuelLast = 0.0f;
-            float fuelDelta = 0.0f;
-            int laps = 0;
-            bool onTrackLast = false;
-            int deployRemain = 4;
-            var deployLast = Translator.MGUKDeployMode(0.0f);
+            var fuelLast = 0.0f;
+            var fuelDelta = 0.0f;
+            var laps = 0;
+            var onTrackLast = false;
+            var deployRemain = 4;
+            var deployLast = Translator.DeployMode(0.0f);
             var bbLast = data.Get<float>("dcBrakeBias");
             var bbMigLast = data.Get<float>("dcPeakBrakeBias");
             var diffEntryLast = data.Get<float>("dcDiffEntry");
@@ -80,16 +78,18 @@ namespace W12Dash
             var diffExitLast = data.Get<float>("dcDiffExit");
             var engBrkLast = data.Get<float>("dcEngineBraking");
 
-            while (true)
+            var token = _cancellationTokenSource.Token;
+            
+            while (!token.IsCancellationRequested)
             {
-                data = connection.QueryData();
+                data = _connection.QueryData();
 
                 var onTrack = data.Get<bool>("IsOnTrack");
                 var brake = data.Get<float>("Brake");
                 var brakeScaled = brake > 0.5f ? 2 * brake - 1 : 0;
                 var gear = Translator.Gear(data.Get<int>("Gear"));
-                var deploy = Translator.MGUKDeployMode(data.Get<float>("dcMGUKDeployMode"));
-                var batt = (int)(data.Get<float>("EnergyERSBattery") / 40000);
+                var deploy = Translator.DeployMode(data.Get<float>("dcMGUKDeployMode"));
+                var battery = (int)(data.Get<float>("EnergyERSBattery") / 40000);
                 var rpm = (int)(data.Get<float>("RPM"));
                 var drs = data.Get<int>("DRS_Status");
                 var pitLim = data.Get<bool>("dcPitSpeedLimiterToggle");
@@ -136,43 +136,47 @@ namespace W12Dash
 
                 deployLast = deploy;
 
-                this.Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
                 {
-                    if (!onTrack && onTrackLast)
-                        this.WindowState = WindowState.Minimized;
-
-                    if (onTrack && !onTrackLast)
-                        this.WindowState = WindowState.Normal;
+                    switch (onTrack)
+                    {
+                        case false when onTrackLast:
+                            WindowState = WindowState.Minimized;
+                            break;
+                        case true when !onTrackLast:
+                            WindowState = WindowState.Normal;
+                            break;
+                    }
 
                     onTrackLast = onTrack;
 
-                    if (bb != bbLast)
+                    if (Math.Abs(bb - bbLast) > TOLERANCE)
                     {
                         bbLast = bb;
-                        StartOverlay(bbAll, null, limeGreen, customBlack);
+                        StartOverlay(bbAll, null, _limeGreen, _customBlack);
                     }
 
-                    if (bbMig != bbMigLast)
-                        bbMigLast = (float)StartOverlay(bbMig, "Brk MIG", customGreen, white);
+                    if (Math.Abs(bbMig - bbMigLast) > TOLERANCE)
+                        bbMigLast = (float)StartOverlay(bbMig, "Brk MIG", _customGreen, _white);
 
-                    if (diffEntry != diffEntryLast)
-                        diffEntryLast = (float)StartOverlay(diffEntry, "Diff Entry", customBlue, white);
+                    if (Math.Abs(diffEntry - diffEntryLast) > TOLERANCE)
+                        diffEntryLast = (float)StartOverlay(diffEntry, "Diff Entry", _customBlue, _white);
 
-                    if (diffMiddle != diffMiddleLast)
-                        diffMiddleLast = (float)StartOverlay(diffMiddle, "Diff Mid", customBlue, white);
+                    if (Math.Abs(diffMiddle - diffMiddleLast) > TOLERANCE)
+                        diffMiddleLast = (float)StartOverlay(diffMiddle, "Diff Mid", _customBlue, _white);
 
-                    if (diffExit != diffExitLast)
-                        diffExitLast = (float)StartOverlay(diffExit, "Diff Hispd", customBlue, white);
+                    if (Math.Abs(diffExit - diffExitLast) > TOLERANCE)
+                        diffExitLast = (float)StartOverlay(diffExit, "Diff Hispd", _customBlue, _white);
 
-                    if (engBrk != engBrkLast)
-                        engBrkLast = (float)StartOverlay(engBrk, "Eng Brk", customBlue, white);
+                    if (Math.Abs(engBrk - engBrkLast) > TOLERANCE)
+                        engBrkLast = (float)StartOverlay(engBrk, "Eng Brk", _customBlue, _white);
 
-                    overlay.Visibility = overlayTimer.Q ? Visibility.Hidden : Visibility.Visible;
+                    overlay.Visibility = _overlayTimer.Q ? Visibility.Hidden : Visibility.Visible;
 
                     lblPitLim.Visibility = pitLim ? Visibility.Visible : Visibility.Hidden;
                     lblGear.Content = gear;
                     lblDeploy.Content = deploy;
-                    lblBattery.Content = batt;
+                    lblBattery.Content = battery;
                     lblBrakeBias.Content = bbAll;
                     lblLast.Content = llt;
                     lblLL.Content = $"{fuelLast:0.00}".Replace(",", ".");
@@ -180,7 +184,7 @@ namespace W12Dash
                     lblLap.Content = laps;
                     lblDeployRemain.Content = deployRemain;
                     lblDelta.Content = delta;
-                    lblDelta.Foreground = deltaBestLap > 0 ? darkRed : limeGreen;
+                    lblDelta.Foreground = deltaBestLap > 0 ? _darkRed : _limeGreen;
 
                     if (pitLim)
                     {
@@ -279,6 +283,8 @@ namespace W12Dash
             }
         }
 
+        private const double TOLERANCE = 0.000001;
+
         private object StartOverlay(object value, object text, Brush background, Brush foreground)
         {
             lblOverlay.Content = value;
@@ -287,54 +293,54 @@ namespace W12Dash
             lblOverlayTxt.Content = text;
             lblOverlayTxt.Background = background;
             lblOverlayTxt.Foreground = foreground;
-            overlayTimer.Start(1500);
+            _overlayTimer.Start(1500);
             return value;
         }
 
-        private void RevLightGreen(Ellipse led, bool on)
+        private void RevLightGreen(Shape led, bool on)
         {
             if (on)
             {
-                led.Stroke = lawnGreen;
-                led.Fill = lawnGreen;
+                led.Stroke = _lawnGreen;
+                led.Fill = _lawnGreen;
                 led.Opacity = 1.0;
             }
             else
             {
-                led.Stroke = transparent;
-                led.Fill = dimGray;
+                led.Stroke = _transparent;
+                led.Fill = _dimGray;
                 led.Opacity = 0.5;
             }
         }
 
-        private void RevLightRed(Ellipse led, bool on)
+        private void RevLightRed(Shape led, bool on)
         {
             if (on)
             {
-                led.Stroke = orangeRed;
-                led.Fill = orangeRed;
+                led.Stroke = _orangeRed;
+                led.Fill = _orangeRed;
                 led.Opacity = 1.0;
             }
             else
             {
-                led.Stroke = transparent;
-                led.Fill = dimGray;
+                led.Stroke = _transparent;
+                led.Fill = _dimGray;
                 led.Opacity = 0.5;
             }
         }
 
-        private void RevLightBlue(Ellipse led, bool on)
+        private void RevLightBlue(Shape led, bool on)
         {
             if (on)
             {
-                led.Stroke = deepSkyBlue;
-                led.Fill = deepSkyBlue;
+                led.Stroke = _deepSkyBlue;
+                led.Fill = _deepSkyBlue;
                 led.Opacity = 1.0;
             }
             else
             {
-                led.Stroke = transparent;
-                led.Fill = dimGray;
+                led.Stroke = _transparent;
+                led.Fill = _dimGray;
                 led.Opacity = 0.5;
             }
         }
@@ -369,15 +375,10 @@ namespace W12Dash
         private void Rectangle_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
-                this.DragMove();
+                DragMove();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
-
-        bool overButton;
+        private bool _overButton;
 
         private void Rectangle_MouseEnter(object sender, MouseEventArgs e)
         {
@@ -387,11 +388,9 @@ namespace W12Dash
 
         private void Rectangle_MouseLeave(object sender, MouseEventArgs e)
         {
-            if (!overButton)
-            {
-                lblExit.Visibility = Visibility.Hidden;
-                lblMinimize.Visibility = Visibility.Hidden;
-            }
+            if (_overButton) return;
+            lblExit.Visibility = Visibility.Hidden;
+            lblMinimize.Visibility = Visibility.Hidden;
         }
 
         private void LblExit_MouseEnter(object sender, MouseEventArgs e)
@@ -399,7 +398,7 @@ namespace W12Dash
             lblExit.Visibility = Visibility.Visible;
             lblMinimize.Visibility = Visibility.Visible;
             lblExit.FontWeight = FontWeights.Bold;
-            overButton = true;
+            _overButton = true;
         }
 
         private void LblExit_MouseLeave(object sender, MouseEventArgs e)
@@ -407,61 +406,58 @@ namespace W12Dash
             lblExit.Visibility = Visibility.Hidden;
             lblMinimize.Visibility = Visibility.Hidden;
             lblExit.FontWeight = FontWeights.Normal;
-            overButton = false;
+            _overButton = false;
         }
 
         private void LblExit_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
-                this.Close();
+            if (e.ChangedButton == MouseButton.Left) Close();
         }
 
         private void Window_SourceInitialized(object sender, EventArgs e)
         {
-            defaultHeigth = this.Height;
-            defaultWidth = this.Width;
+            _defaultHeight = Height;
+            _defaultWidth = Width;
 
-            key = Registry.CurrentUser.OpenSubKey("Software", true);
+            _key = Registry.CurrentUser.OpenSubKey("Software", true);
 
-            if (key.OpenSubKey("W12Dash") == null)
+            if (_key?.OpenSubKey("W12Dash") == null)
             {
-                key.CreateSubKey("W12Dash");
-                key = key.OpenSubKey("W12Dash", true);
+                _key?.CreateSubKey("W12Dash");
+                _key = _key?.OpenSubKey("W12Dash", true);
 
-                key.SetValue("Left", BitConverter.GetBytes(this.Left));
-                key.SetValue("Top", BitConverter.GetBytes(this.Left));
-                key.SetValue("Opacity", BitConverter.GetBytes(this.border.Background.Opacity));
-                key.SetValue("Scale", BitConverter.GetBytes(scale));
+                _key?.SetValue("Left", BitConverter.GetBytes(Left));
+                _key?.SetValue("Top", BitConverter.GetBytes(Left));
+                _key?.SetValue("Opacity", BitConverter.GetBytes(border.Background.Opacity));
+                _key?.SetValue("Scale", BitConverter.GetBytes(_scale));
 
                 return;
             }
 
-            key = key.OpenSubKey("W12Dash", true);
-            this.Left = BitConverter.ToDouble((byte[])key.GetValue("Left"), 0);
-            this.Top = BitConverter.ToDouble((byte[])key.GetValue("Top"), 0);
-            opacity = opacityLast = BitConverter.ToDouble((byte[])key.GetValue("Opacity"), 0);
-            scale = scaleLast = BitConverter.ToDouble((byte[])key.GetValue("Scale"), 0);
+            _key = _key.OpenSubKey("W12Dash", true);
+            Left = BitConverter.ToDouble((byte[])_key?.GetValue("Left") ?? Array.Empty<byte>(), 0);
+            Top = BitConverter.ToDouble((byte[])_key?.GetValue("Top") ?? Array.Empty<byte>(), 0);
+            _opacity = _opacityLast = BitConverter.ToDouble((byte[])_key?.GetValue("Opacity") ?? Array.Empty<byte>(), 0);
+            _scale = _scaleLast = BitConverter.ToDouble((byte[])_key?.GetValue("Scale") ?? Array.Empty<byte>(), 0);
 
-            this.border.Background.Opacity = opacity;
+            border.Background.Opacity = _opacity;
 
-            ScaleTransform scaleTransform = new ScaleTransform(scale, scale);
-            TransformGroup transformGroup = new TransformGroup();
+            var scaleTransform = new ScaleTransform(_scale, _scale);
+            var transformGroup = new TransformGroup();
             transformGroup.Children.Add(scaleTransform);
             border.RenderTransform = transformGroup;
 
-            if (scale > 1.0)
-            {
-                this.Height *= scale;
-                this.Width *= scale;
-            }
+            if (!(_scale > 1.0)) return;
+            Height *= _scale;
+            Width *= _scale;
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            key.SetValue("Left", BitConverter.GetBytes(this.Left));
-            key.SetValue("Top", BitConverter.GetBytes(this.Top));
-            key.SetValue("Opacity", BitConverter.GetBytes(opacity));
-            key.SetValue("Scale", BitConverter.GetBytes(scale));
+            _key.SetValue("Left", BitConverter.GetBytes(Left));
+            _key.SetValue("Top", BitConverter.GetBytes(Top));
+            _key.SetValue("Opacity", BitConverter.GetBytes(_opacity));
+            _key.SetValue("Scale", BitConverter.GetBytes(_scale));
         }
 
         private void LblMinimize_MouseEnter(object sender, MouseEventArgs e)
@@ -469,7 +465,7 @@ namespace W12Dash
             lblExit.Visibility = Visibility.Visible;
             lblMinimize.Visibility = Visibility.Visible;
             lblMinimize.FontWeight = FontWeights.Bold;
-            overButton = true;
+            _overButton = true;
         }
 
         private void LblMinimize_MouseLeave(object sender, MouseEventArgs e)
@@ -477,18 +473,17 @@ namespace W12Dash
             lblExit.Visibility = Visibility.Hidden;
             lblMinimize.Visibility = Visibility.Hidden;
             lblMinimize.FontWeight = FontWeights.Normal;
-            overButton = false;
+            _overButton = false;
         }
 
         private void LblMinimize_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            this.WindowState = WindowState.Minimized;
+            WindowState = WindowState.Minimized;
         }
 
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.S) || Keyboard.IsKeyDown(Key.O))
-                return;
+            if (Keyboard.IsKeyDown(Key.S) || Keyboard.IsKeyDown(Key.O)) return;
             lblSettings.Visibility = Visibility.Hidden;
         }
 
@@ -498,58 +493,51 @@ namespace W12Dash
             {
                 case Key.Up:
                     if (Keyboard.IsKeyDown(Key.O))
-                        opacity += 0.01;
+                        _opacity += 0.01;
                     if (Keyboard.IsKeyDown(Key.S))
-                        scale += 0.01;
+                        _scale += 0.01;
                     break;
                 case Key.Down:
                     if (Keyboard.IsKeyDown(Key.O))
-                        opacity -= 0.01;
+                        _opacity -= 0.01;
                     if (Keyboard.IsKeyDown(Key.S))
-                        scale -= 0.01;
+                        _scale -= 0.01;
                     break;
             }
 
-            if (opacity != opacityLast)
+            if (Math.Abs(_opacity - _opacityLast) > TOLERANCE)
             {
-                if (opacity > 1.0)
-                    opacity = 1.0;
+                if (_opacity > 1.0) _opacity = 1.0;
+                if (_opacity < 0.01) _opacity = 0.01;
+                
+                _opacityLast = _opacity;
 
-                if (opacity < 0.01)
-                    opacity = 0.01;
-
-                opacityLast = opacity;
-
-                this.border.Background.Opacity = opacity;
+                border.Background.Opacity = _opacity;
                 lblSettings.Visibility = Visibility.Visible;
-                lblSettings.Content = $"Opacity {(int)(opacity * 100.0)}%";
+                lblSettings.Content = $"Opacity {(int)(_opacity * 100.0)}%";
                 return;
             }
 
-            if (scale == scaleLast)
-                return;
+            if (Math.Abs(_scale - _scaleLast) < TOLERANCE) return;
 
-            if (scale > 5.0)
-                scale = 5.0;
+            if (_scale > 5.0) _scale = 5.0;
+            if (_scale < 0.5) _scale = 0.5;
 
-            if (scale < 0.5)
-                scale = 0.5;
-
-            ScaleTransform scaleTransform = new ScaleTransform(scale, scale);
-            TransformGroup transformGroup = new TransformGroup();
+            var scaleTransform = new ScaleTransform(_scale, _scale);
+            var transformGroup = new TransformGroup();
             transformGroup.Children.Add(scaleTransform);
             border.RenderTransform = transformGroup;
 
-            if (scale > 1.0)
+            if (_scale > 1.0)
             {
-                this.Height = defaultHeigth * scale;
-                this.Width = defaultWidth * scale;
+                Height = _defaultHeight * _scale;
+                Width = _defaultWidth * _scale;
             }
 
-            scaleLast = scale;
+            _scaleLast = _scale;
 
             lblSettings.Visibility = Visibility.Visible;
-            lblSettings.Content = $"Scale {(int)(scale * 100.0)}%";
+            lblSettings.Content = $"Scale {(int)(_scale * 100.0)}%";
         }
     }
 }

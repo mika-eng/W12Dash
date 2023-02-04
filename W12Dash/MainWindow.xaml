@@ -14,7 +14,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Label}">
-                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true" CornerRadius="7.5">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true" CornerRadius="5.5">
                             <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -30,7 +30,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Label}">
-                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true" CornerRadius="0,0,0,7.5">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true" CornerRadius="0,0,0,5.5">
                             <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -48,7 +48,7 @@
             <SolidColorBrush Opacity="0.5" Color="Black"/>
         </Border.Background>
         <Grid Margin="0,0,504,359">
-            <Border Margin="20,62,-460,-320" Background="#FF0a0a0a" Opacity="0.8" BorderThickness="1" BorderBrush="#33C8C8C8" CornerRadius="8">
+            <Border Margin="20,62,-460,-320" Background="#FF0a0a0a" Opacity="0.8" BorderThickness="1" BorderBrush="#33C8C8C8" CornerRadius="6">
                 <Canvas Margin="-1,0,1,0"  >
                     <Label x:Name="lblLapTxt" Content="LAP" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="16" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="24" VerticalAlignment="Top" Width="42" Canvas.Left="402" Canvas.Top="6"/>
                     <Label x:Name="lblDeployRemainTxt" Content="DEPLOY" HorizontalAlignment="Left" Foreground="#FFC8C8C8" FontSize="16" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Calibri" Height="24" VerticalAlignment="Top" Width="65" Canvas.Top="6" Canvas.Left="-3"/>

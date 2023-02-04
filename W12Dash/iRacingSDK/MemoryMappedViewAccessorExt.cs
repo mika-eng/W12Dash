@@ -16,15 +16,24 @@
 // You should have received a copy of the GNU General Public License
 // along with iRacingSDK.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace W12Dash
+namespace W12Dash.iRacingSDK
 {
-    public enum VarType
+    public static class MemoryMappedViewAccessorExt
     {
-        Char,
-        Bool,
-        Int,
-        BitField,
-        Float,
-        Double
-    };
+        public unsafe delegate T MyFn<out T>(byte* ptr);
+
+        public static unsafe T AcquirePointer<T>(this System.IO.MemoryMappedFiles.MemoryMappedViewAccessor self, MyFn<T> fn)
+        {
+            byte* ptr = null;
+            self.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
+            try
+            {
+                return fn(ptr);
+            }
+            finally
+            {
+                self.SafeMemoryMappedViewHandle.ReleasePointer();
+            }
+        }
+    }
 }

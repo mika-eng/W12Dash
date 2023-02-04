@@ -2,29 +2,23 @@
 
 namespace W12Dash
 {
-    class Timer
+    internal class Timer
     {
-        DateTime start;
-        int time;
+        private DateTime _start;
+        private int _time;
 
         public Timer()
         {
-            this.time = 0;
-            start = DateTime.Now;
+            _time = 0;
+            _start = DateTime.Now;
         }
 
         public void Start(int time)
         {
-            this.time = time;
-            start = DateTime.Now;
+            _time = time;
+            _start = DateTime.Now;
         }
 
-        public bool Q
-        {
-            get
-            {
-                return (DateTime.Now - start).TotalMilliseconds >= time;
-            }
-        }
+        public bool Q => (DateTime.Now - _start).TotalMilliseconds >= _time;
     }
 }

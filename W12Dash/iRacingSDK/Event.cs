@@ -16,30 +16,22 @@
 // You should have received a copy of the GNU General Public License
 // along with iRacingSDK.  If not, see <http://www.gnu.org/licenses/>.
 
+using System;
 using System.Runtime.InteropServices;
 
-namespace W12Dash
+namespace W12Dash.iRacingSDK
 {
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-	internal struct VarHeader
-	{
-		//0..3
-		public VarType type;
-		//4..7
-		public int offset;
-		//8..11
-		public int count;
-        //12..15
-		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)]
-		public int[] pad;
-		//16..47
-		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-		public string name;
-		//48..111
-		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
-		public string desc;
-		//112..143
-		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-		public string unit;
-	}	
+    internal static class Event
+    {
+        public const uint STANDARD_RIGHTS_REQUIRED = 0x000F0000;
+        public const uint SYNCHRONIZE = 0x00100000;
+        public const uint EVENT_ALL_ACCESS = (STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0x3);
+        public const uint EVENT_MODIFY_STATE = 0x0002;
+
+        [DllImport("Kernel32.dll", SetLastError = true)]
+        public static extern IntPtr OpenEvent(uint dwDesiredAccess, bool bInheritHandle, string lpName);
+
+        [DllImport("kernel32", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
+        public static extern int WaitForSingleObject(IntPtr handle, int wait);
+    }
 }

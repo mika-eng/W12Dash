@@ -16,22 +16,21 @@
 // You should have received a copy of the GNU General Public License
 // along with iRacingSDK.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
 using System.Runtime.InteropServices;
 
-namespace W12Dash
+namespace W12Dash.iRacingSDK
 {
-    internal static class Event
-    {
-        public const uint STANDARD_RIGHTS_REQUIRED = 0x000F0000;
-        public const uint SYNCHRONIZE = 0x00100000;
-        public const uint EVENT_ALL_ACCESS = (STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0x3);
-        public const uint EVENT_MODIFY_STATE = 0x0002;
-
-        [DllImport("Kernel32.dll", SetLastError = true)]
-        public static extern IntPtr OpenEvent(uint dwDesiredAccess, bool bInheritHandle, string lpName);
-
-        [DllImport("kernel32", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
-        public static extern Int32 WaitForSingleObject(IntPtr Handle, Int32 Wait);
-    }
+	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+	public struct VarBuf
+	{
+        //0..3
+        [MarshalAs(UnmanagedType.I4)]
+        public readonly int tickCount;
+        //4..7
+        [MarshalAs(UnmanagedType.I4)]
+        public readonly int bufOffset;
+        //8..15
+		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+		public readonly int[] pad;
+	}
 }
